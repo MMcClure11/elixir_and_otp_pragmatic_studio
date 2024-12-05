@@ -2,10 +2,29 @@ defmodule Servy.Handler do
   def handle(request) do
     request
     |> parse
+    |> rewrite_path
     |> log
     |> route
+    |> track
     |> format_response
   end
+
+  defp track(%{status: 404, path: path} = conv) do
+    IO.puts("Warning: #{path} is on the loose!")
+    conv
+  end
+
+  defp track(conv), do: conv
+
+  defp rewrite_path(%{path: "/wildlife"} = conv) do
+    %{conv | path: "/wildthings"}
+  end
+
+  defp rewrite_path(%{path: "/bears?id=" <> id} = conv) do
+    %{conv | path: "/bears/#{id}"}
+  end
+
+  defp rewrite_path(conv), do: conv
 
   def log(conv), do: IO.inspect(conv)
 
@@ -31,8 +50,8 @@ defmodule Servy.Handler do
     %{conv | status: 200, resp_body: "Bears id #{id}"}
   end
 
-  def route(%{method: "DELETE", path: "/bears/" <> id} = conv) do
-    %{conv | status: 200, resp_body: "Bears id #{id} deleted"}
+  def route(%{method: "DELETE", path: "/bears/" <> _id} = conv) do
+    %{conv | status: 200, resp_body: "Deleting bears is not allowed!"}
   end
 
   def route(%{method: _method, path: path} = conv) do
@@ -90,6 +109,17 @@ response = Servy.Handler.handle(request)
 IO.puts(response)
 
 request = """
+GET /bigfoot HTTP/1.1
+Host: example.com
+User-Agent: ExampleBrowser/1.0
+Accept: */*
+
+"""
+
+response = Servy.Handler.handle(request)
+IO.puts(response)
+
+request = """
 GET /bears HTTP/1.1
 Host: example.com
 User-Agent: ExampleBrowser/1.0
@@ -113,6 +143,28 @@ IO.puts(response)
 
 request = """
 DELETE /bears/1 HTTP/1.1
+Host: example.com
+User-Agent: ExampleBrowser/1.0
+Accept: */*
+
+"""
+
+response = Servy.Handler.handle(request)
+IO.puts(response)
+
+request = """
+GET /wildlife HTTP/1.1
+Host: example.com
+User-Agent: ExampleBrowser/1.0
+Accept: */*
+
+"""
+
+response = Servy.Handler.handle(request)
+IO.puts(response)
+
+request = """
+GET /bears?id=1 HTTP/1.1
 Host: example.com
 User-Agent: ExampleBrowser/1.0
 Accept: */*
