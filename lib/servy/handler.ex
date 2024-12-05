@@ -6,8 +6,18 @@ defmodule Servy.Handler do
     |> log
     |> route
     |> track
+    |> emojify
     |> format_response
   end
+
+  defp emojify(%{status: 200, resp_body: resp_body} = conv) do
+    emojies = String.duplicate("🎉", 5)
+    body = emojies <> "\n" <> resp_body <> "\n" <> emojies
+
+    %{conv | resp_body: body}
+  end
+
+  defp emojify(conv), do: conv
 
   defp track(%{status: 404, path: path} = conv) do
     IO.puts("Warning: #{path} is on the loose!")
