@@ -1,4 +1,6 @@
 defmodule Servy.Handler do
+  require Logger
+
   def handle(request) do
     request
     |> parse
@@ -57,10 +59,12 @@ defmodule Servy.Handler do
   end
 
   def route(%{method: "GET", path: "/wildthings"} = conv) do
+    Logger.info("What about 2nd breakfast?")
     %{conv | status: 200, resp_body: "Bears, Liöns, Tigers"}
   end
 
   def route(%{method: "GET", path: "/bears"} = conv) do
+    Logger.warning("uh oh. i messed up")
     %{conv | status: 200, resp_body: "Winnie, Paddington, Smokey"}
   end
 
@@ -69,6 +73,7 @@ defmodule Servy.Handler do
   end
 
   def route(%{method: "DELETE", path: "/bears/" <> _id} = conv) do
+    Logger.error("No can do")
     %{conv | status: 200, resp_body: "Deleting bears is not allowed!"}
   end
 
