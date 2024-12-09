@@ -11,7 +11,14 @@ defmodule Recurse do
   end
 
   def sum([], total), do: IO.puts("Total: #{total}")
+
+  def triple([head | tail], triple) do
+    triple(tail, triple ++ [head * 3])
+  end
+
+  def triple([], triple), do: dbg(triple)
 end
 
 Recurse.loopy([1, 2, 3, 4, 5])
 Recurse.sum([1, 2, 3, 4, 5], 0)
+Recurse.triple([1, 2, 3, 4, 5], [])
