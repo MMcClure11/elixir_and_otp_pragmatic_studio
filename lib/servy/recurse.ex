@@ -12,11 +12,17 @@ defmodule Recurse do
 
   def sum([], total), do: IO.puts("Total: #{total}")
 
-  def triple([head | tail]) do
-    [head * 3 | triple(tail)]
+  def triple(list) do
+    triple(list, [])
   end
 
-  def triple([]), do: []
+  defp triple([head | tail], current_list) do
+    triple(tail, [head * 3 | current_list])
+  end
+
+  defp triple([], current_list) do
+    current_list |> Enum.reverse()
+  end
 end
 
 Recurse.loopy([1, 2, 3, 4, 5])
