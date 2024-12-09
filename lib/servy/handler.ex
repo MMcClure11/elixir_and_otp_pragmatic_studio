@@ -7,6 +7,7 @@ defmodule Servy.Handler do
   import Servy.Parser, only: [parse: 1]
   import Servy.Plugins, only: [rewrite_path: 1, log: 1, track: 1]
 
+  alias Servy.BearController
   alias Servy.Conv
 
   #  File.cwd! returns the current working directory.
@@ -44,7 +45,7 @@ defmodule Servy.Handler do
 
   def route(%Conv{method: "GET", path: "/bears"} = conv) do
     Logger.warning("uh oh. i messed up")
-    %{conv | status: 200, resp_body: "Winnie, Paddington, Smokey"}
+    BearController.index(conv)
   end
 
   def route(%Conv{method: "GET", path: "/bears/new"} = conv) do
@@ -55,7 +56,8 @@ defmodule Servy.Handler do
   end
 
   def route(%Conv{method: "GET", path: "/bears/" <> id} = conv) do
-    %{conv | status: 200, resp_body: "Bears id #{id}"}
+    params = Map.put(conv.params, "id", id)
+    BearController.show(conv, params)
   end
 
   def route(%Conv{method: "DELETE", path: "/bears/" <> _id} = conv) do
@@ -83,11 +85,7 @@ defmodule Servy.Handler do
   end
 
   def route(%Conv{method: "POST", path: "/bears"} = conv) do
-    %{
-      conv
-      | status: 201,
-        resp_body: "Created a #{conv.params["type"]} bear named #{conv.params["name"]}!"
-    }
+    BearController.create(conv, conv.params)
   end
 
   def route(%Conv{method: _method, path: path} = conv) do
