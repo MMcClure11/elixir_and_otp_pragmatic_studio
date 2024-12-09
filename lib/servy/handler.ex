@@ -91,6 +91,18 @@ defmodule Servy.Handler do
     |> handle_file(conv)
   end
 
+  # Suppose you had other static pages in the pages directory such as
+  # contact.html, faq.html, and so on. You already know how to define separate
+  # route functions that serve each of those files. Instead, how would you
+  # define one generic route function that handles the following requests:
+
+  def route(%{method: "GET", path: "/pages/" <> file} = conv) do
+    Path.expand("../../pages", __DIR__)
+    |> Path.join(file <> ".html")
+    |> File.read()
+    |> handle_file(conv)
+  end
+
   def route(%{method: _method, path: path} = conv) do
     %{conv | status: 404, resp_body: "No #{path} here!"}
   end
