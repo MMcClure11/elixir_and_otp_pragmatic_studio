@@ -1,17 +1,8 @@
 defmodule Servy.BearController do
+  import Servy.View, only: [render: 3]
+
   alias Servy.Bear
   alias Servy.Wildthings
-
-  @templates_path Path.expand("templates", File.cwd!())
-
-  defp render(conv, template, bindings \\ []) do
-    content =
-      @templates_path
-      |> Path.join(template)
-      |> EEx.eval_file(bindings)
-
-    %{conv | status: 200, resp_body: content}
-  end
 
   def index(%Servy.Conv{} = conv) do
     bears = Wildthings.list_bears() |> Enum.sort(&Bear.order_asc_by_name/2)
