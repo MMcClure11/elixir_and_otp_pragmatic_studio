@@ -33,6 +33,12 @@ defmodule Recurse do
   end
 
   defp my_map([], _multiply, current_list), do: current_list |> Enum.reverse()
+
+  def their_map([head | tail], fun) do
+    [fun.(head) | their_map(tail, fun)]
+  end
+
+  def their_map([], _fun), do: []
 end
 
 Recurse.loopy([1, 2, 3, 4, 5])
@@ -40,3 +46,5 @@ Recurse.sum([1, 2, 3, 4, 5], 0)
 IO.inspect(Recurse.triple([1, 2, 3, 4, 5]))
 IO.puts("my_map: ")
 IO.inspect(Recurse.my_map([1, 2, 3, 4, 5], &(&1 * 4)))
+IO.puts("their_map: ")
+IO.inspect(Recurse.their_map([1, 2, 3, 4, 5], &(&1 * 4)))
