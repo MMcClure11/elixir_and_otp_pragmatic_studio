@@ -176,6 +176,28 @@ defmodule HandlerTest do
            """
   end
 
+  test "DELETE /bears/1" do
+    request = """
+    DELETE /bears/1 HTTP/1.1\r
+    Host: example.com\r
+    User-Agent: ExampleBrowser/1.0\r
+    Accept: */*\r
+    \r
+    """
+
+    response = handle(request)
+
+    expected_response = """
+     HTTP/1.1 403 Forbidden\r
+     Content-Type: text/html\r
+     Content-Length: 29\r
+     \r
+     Deleting a bear is forbidden!
+    """
+
+    assert remove_whitespace(response) == remove_whitespace(expected_response)
+  end
+
   defp remove_whitespace(text) do
     String.replace(text, ~r{\s}, "")
   end
