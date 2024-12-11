@@ -77,11 +77,12 @@ defmodule Servy.Handler do
   # route functions that serve each of those files. Instead, how would you
   # define one generic route function that handles the following requests:
 
-  def route(%Conv{method: "GET", path: "/pages/" <> file} = conv) do
+  def route(%Conv{method: "GET", path: "/pages/" <> name} = conv) do
     @pages_path
-    |> Path.join(file <> ".html")
+    |> Path.join("#{name}.md")
     |> File.read()
     |> handle_file(conv)
+    |> markdown_to_html
   end
 
   def route(%Conv{method: "POST", path: "/bears"} = conv) do
@@ -95,6 +96,12 @@ defmodule Servy.Handler do
   def route(%Conv{method: _method, path: path} = conv) do
     %{conv | status: 404, resp_body: "No #{path} here!"}
   end
+
+  defp markdown_to_html(%Conv{status: 200} = conv) do
+    %{conv | resp_body: Earmark.as_html!(conv.resp_body)}
+  end
+
+  defp markdown_to_html(conv), do: conv
 
   def format_response(%Conv{} = conv) do
     """
