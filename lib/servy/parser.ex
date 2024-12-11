@@ -34,6 +34,10 @@ defmodule Servy.Parser do
     iex> Servy.Parser.parse_params("multipart/form-data", params_string)
     %{}
   """
+  def parse_params("application/json", params_string) do
+    Poison.Parser.parse!(params_string, %{})
+  end
+
   def parse_params("application/x-www-form-urlencoded", params_string) do
     params_string |> String.trim() |> URI.decode_query()
   end
