@@ -25,15 +25,10 @@ defmodule Servy.Handler do
     |> log
     |> route
     |> track
-    |> emojify
     |> format_response
   end
 
-  defp emojify(%Conv{status: 200, resp_body: resp_body} = conv) do
-    %{conv | resp_body: resp_body}
   end
-
-  defp emojify(%Conv{} = conv), do: conv
 
   def route(%Conv{method: "GET", path: "/wildthings"} = conv) do
     Logger.info("What about 2nd breakfast?")
