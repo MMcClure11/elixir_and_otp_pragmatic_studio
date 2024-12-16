@@ -9,6 +9,7 @@ defmodule Servy.Handler do
 
   alias Servy.BearController
   alias Servy.Conv
+  alias Servy.VideoCam
 
   #  File.cwd! returns the current working directory.
   #  mix always runs from the root project directory which is the top-level
@@ -32,6 +33,34 @@ defmodule Servy.Handler do
   defp put_content_length(conv) do
     headers = Map.put(conv.resp_headers, "Content-Length", byte_size(conv.resp_body))
     %{conv | resp_headers: headers}
+  end
+
+  def route(%Conv{method: "GET", path: "/snapshots"} = conv) do
+    # the request handling process
+    parent = self()
+
+    spawn(fn -> send(parent, {:result, VideoCam.get_snapshot("cam-1")}) end)
+    spawn(fn -> send(parent, {:result, VideoCam.get_snapshot("cam-2")}) end)
+    spawn(fn -> send(parent, {:result, VideoCam.get_snapshot("cam-3")}) end)
+
+    snapshot1 =
+      receive do
+        {:result, filename} -> filename
+      end
+
+    snapshot2 =
+      receive do
+        {:result, filename} -> filename
+      end
+
+    snapshot3 =
+      receive do
+        {:result, filename} -> filename
+      end
+
+    snapshots = [snapshot1, snapshot2, snapshot3]
+
+    %{conv | status: 200, resp_body: inspect(snapshots)}
   end
 
   def route(%Conv{method: "GET", path: "/kaboom"} = _conv) do
