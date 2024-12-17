@@ -17,4 +17,26 @@ defmodule HttpSeverTest do
     assert response.status_code == 200
     assert response.body == "Bears, Lions, Tigers"
   end
+
+  test "accepts requests to many different urls" do
+    spawn(HttpServer, :start, [4000])
+
+    urls =
+      [
+        "http://localhost:4000/wildthings",
+        "http://localhost:4000/bears",
+        "http://localhost:4000/api/bears",
+        "http://localhost:4000/bears/1",
+        "http://localhost:4000/about"
+      ]
+
+    urls
+    |> Enum.map(&Task.async(fn -> HTTPoison.get(&1) end))
+    |> Enum.map(&Task.await/1)
+    |> Enum.map(&assert_200_response/1)
+  end
+
+  defp assert_200_response({:ok, response}) do
+    assert response.status_code == 200
+  end
 end
