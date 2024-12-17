@@ -6,6 +6,7 @@ defmodule Servy.Handler do
   import Servy.FileHandler, only: [handle_file: 2]
   import Servy.Parser, only: [parse: 1]
   import Servy.Plugins, only: [rewrite_path: 1, track: 1]
+  import Servy.View, only: [render: 3]
 
   alias Servy.BearController
   alias Servy.Conv
@@ -34,6 +35,12 @@ defmodule Servy.Handler do
     %{conv | resp_headers: headers}
   end
 
+  def route(%Conv{method: "GET", path: "/where_is_bigfoot"} = conv) do
+    task = Task.async(fn -> Servy.Tracker.get_location("bigfoot") end)
+    where_is_bigfoot = Task.await(task)
+    render(conv, "bigfoot_location.eex", location: where_is_bigfoot)
+  end
+
   def route(%Conv{method: "GET", path: "/sensors"} = conv) do
     task = Task.async(fn -> Servy.Tracker.get_location("bigfoot") end)
 
@@ -42,7 +49,9 @@ defmodule Servy.Handler do
       |> Enum.map(&Task.async(fn -> VideoCam.get_snapshot(&1) end))
       |> Enum.map(&Task.await/1)
 
-    where_is_bigfoot = Task.await(task)
+    where_is_bigfoot =
+      Task.await(task)
+      |> dbg()
 
     %{conv | status: 200, resp_body: inspect({snapshots, where_is_bigfoot})}
   end

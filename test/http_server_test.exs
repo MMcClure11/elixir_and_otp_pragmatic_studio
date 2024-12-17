@@ -3,6 +3,18 @@ defmodule HttpSeverTest do
 
   alias Servy.HttpServer
 
+  test "where_is_bigfoot" do
+    spawn(HttpServer, :start, [4000])
+    url = "http://localhost:4000/where_is_bigfoot"
+
+    task = Task.async(fn -> HTTPoison.get(url) end)
+    {:ok, response} = Task.await(task)
+    assert response.status_code == 200
+
+    assert response.body ==
+             "<h1>Where is Bigfoot?</h1>\n<p>\n  Bigfoot is located at latitude 29.0469 N and longitude 98.8667 W.\n</p>\n"
+  end
+
   test "accepts a request on a socket and sends back a response" do
     spawn(HttpServer, :start, [4000])
     url = "http://localhost:4000/wildthings"

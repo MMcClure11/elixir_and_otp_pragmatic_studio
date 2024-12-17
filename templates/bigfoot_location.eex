@@ -1,0 +1,4 @@
+<h1>Where is Bigfoot?</h1>
+<p>
+  Bigfoot is located at latitude <%= location.lat %> and longitude <%= location.lng %>.
+</p>
