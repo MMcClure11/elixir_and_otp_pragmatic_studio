@@ -35,12 +35,6 @@ defmodule Servy.Handler do
     %{conv | resp_headers: headers}
   end
 
-  def route(%Conv{method: "GET", path: "/where_is_bigfoot"} = conv) do
-    task = Task.async(fn -> Servy.Tracker.get_location("bigfoot") end)
-    where_is_bigfoot = Task.await(task)
-    render(conv, "bigfoot_location.eex", location: where_is_bigfoot)
-  end
-
   def route(%Conv{method: "GET", path: "/sensors"} = conv) do
     task = Task.async(fn -> Servy.Tracker.get_location("bigfoot") end)
 
@@ -49,11 +43,9 @@ defmodule Servy.Handler do
       |> Enum.map(&Task.async(fn -> VideoCam.get_snapshot(&1) end))
       |> Enum.map(&Task.await/1)
 
-    where_is_bigfoot =
-      Task.await(task)
-      |> dbg()
+    where_is_bigfoot = Task.await(task)
 
-    %{conv | status: 200, resp_body: inspect({snapshots, where_is_bigfoot})}
+    render(conv, "sensors.eex", snapshots: snapshots, location: where_is_bigfoot)
   end
 
   def route(%Conv{method: "GET", path: "/kaboom"} = _conv) do
