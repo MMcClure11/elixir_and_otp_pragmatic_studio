@@ -2,8 +2,8 @@ defmodule Servy.PledgeServer do
   @name :pledge_server
 
   # Client Interface
-  def start do
-    pid = spawn(__MODULE__, :listen_loop, [[]])
+  def start(initial_state \\ []) do
+    pid = spawn(__MODULE__, :listen_loop, [initial_state])
     Process.register(pid, @name)
     pid
   end
