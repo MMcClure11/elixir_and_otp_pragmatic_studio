@@ -3,24 +3,25 @@ defmodule Servy.FourOhFourCounter do
 
   # Client Interface
   def start(initial_state \\ %{}) do
+    IO.puts("Starting the 404 counter...")
     pid = spawn(__MODULE__, :listen_loop, [initial_state])
     Process.register(pid, @name)
     pid
   end
 
-  def bump_count(route) do
-    send(@name, {self(), :bump_count, route})
+  def bump_count(path) do
+    send(@name, {self(), :bump_count, path})
 
     receive do
-      {:response, status} -> status
+      {:response, count} -> count
     end
   end
 
-  def get_count(route) do
-    send(@name, {self(), :get_count, route})
+  def get_count(path) do
+    send(@name, {self(), :get_count, path})
 
     receive do
-      {:response, pledges} -> pledges
+      {:response, count} -> count
     end
   end
 
@@ -28,21 +29,21 @@ defmodule Servy.FourOhFourCounter do
     send(@name, {self(), :get_counts})
 
     receive do
-      {:response, pledges} -> pledges
+      {:response, counts} -> counts
     end
   end
 
   # Server
   def listen_loop(state) do
     receive do
-      {sender, :bump_count, route} ->
-        current_count_for_route = Map.get(state, route, 0)
-        new_state = Map.put(state, route, current_count_for_route + 1)
-        send(sender, {:response, new_state})
+      {sender, :bump_count, path} ->
+        new_state = Map.update(state, path, 1, &(&1 + 1))
+        send(sender, {:response, Map.get(new_state, path)})
         listen_loop(new_state)
 
-      {sender, :get_count, route} ->
-        send(sender, {:response, Map.get(state, route)})
+      {sender, :get_count, path} ->
+        count = Map.get(state, path, 0)
+        send(sender, {:response, count})
         listen_loop(state)
 
       {sender, :get_counts} ->
